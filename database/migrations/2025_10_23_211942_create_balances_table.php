@@ -18,7 +18,9 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement('ALTER TABLE balances ADD CONSTRAINT amount_non_negative CHECK (amount >= 0)');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE balances ADD CONSTRAINT amount_non_negative CHECK (amount >= 0)');
+        }
     }
 
     /**
