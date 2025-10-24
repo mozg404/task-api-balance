@@ -6,7 +6,7 @@ use App\DTO\BalanceRequestDto;
 use App\DTO\BalanceResultDto;
 use App\DTO\DepositDto;
 use App\DTO\TransferDto;
-use App\DTO\WithdrawDTO;
+use App\DTO\WithdrawDto;
 use App\Models\User;
 use App\Services\BalanceOperator;
 use App\Services\BalanceService;
@@ -84,7 +84,7 @@ class BalanceServiceTest extends TestCase
     public function canWithdraw(): void
     {
         $user = User::factory()->create();
-        $dto = new WithdrawDTO($user->id, 50, 'Списание');
+        $dto = new WithdrawDto($user->id, 50, 'Списание');
 
         $this->operator->expects($this->once())->method('withdraw');
         $this->registrar->expects($this->once())->method('registerWithdrawOperation');
@@ -95,7 +95,7 @@ class BalanceServiceTest extends TestCase
     #[Test]
     public function cannotWithdrawIfUserNotExists(): void
     {
-        $dto = new WithdrawDTO(999, 50, 'Списание');
+        $dto = new WithdrawDto(999, 50, 'Списание');
 
         $this->expectException(ModelNotFoundException::class);
 
@@ -106,7 +106,7 @@ class BalanceServiceTest extends TestCase
     public function withdrawUsesDatabaseTransaction(): void
     {
         $user = User::factory()->create();
-        $dto = new WithdrawDTO($user->id, 50, 'Списание');
+        $dto = new WithdrawDto($user->id, 50, 'Списание');
 
         DB::shouldReceive('transaction')->once();
 

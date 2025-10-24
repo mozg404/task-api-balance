@@ -6,7 +6,7 @@ use App\DTO\BalanceRequestDto;
 use App\DTO\BalanceResultDto;
 use App\DTO\DepositDto;
 use App\DTO\TransferDto;
-use App\DTO\WithdrawDTO;
+use App\DTO\WithdrawDto;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +37,7 @@ readonly class BalanceService
         });
     }
 
-    public function withdraw(WithdrawDTO $dto): void
+    public function withdraw(WithdrawDto $dto): void
     {
         $this->ensureExistUser($dto->user_id);
 
