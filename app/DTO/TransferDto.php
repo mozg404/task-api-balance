@@ -9,7 +9,7 @@ class TransferDto extends Data
     public function __construct(
         readonly public int $from_user_id,
         readonly public int $to_user_id,
-        readonly float $amount,
+        readonly public float $amount,
         readonly public string $comment,
     ) {
     }

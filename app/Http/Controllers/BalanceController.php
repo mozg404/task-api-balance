@@ -64,6 +64,7 @@ class BalanceController extends Controller
     {
         return response()->json(array_merge(['status' => ResponseStatus::Success->value], $data));
     }
+
     private function jsonError(Exception $e, int $statusCode = 409): JsonResponse
     {
         return response()->json([
