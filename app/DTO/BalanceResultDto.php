@@ -8,7 +8,7 @@ class BalanceResultDto extends Data
 {
     public function __construct(
         readonly public int $user_id,
-        readonly float $balance,
+        readonly public float $balance,
     ) {
     }
 }
