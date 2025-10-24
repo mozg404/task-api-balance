@@ -23,4 +23,11 @@ cli:
 	docker compose exec php-cli bash
 
 migrate-fresh:
-	docker compose run --rm php-cli php artisan migrate:fresh
+	docker compose exec php-cli php artisan migrate:fresh --seed
+
+test:
+	docker compose exec php-cli php artisan test
+
+generate-phpdoc:
+	docker compose exec php-cli php artisan ide-helper:generate
+	docker compose exec php-cli php artisan ide-helper:models -RW
