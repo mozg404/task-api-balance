@@ -27,3 +27,7 @@ migrate-fresh:
 
 test:
 	docker compose exec php-cli php artisan test
+
+generate-phpdoc:
+	docker compose exec php-cli php artisan ide-helper:generate
+	docker compose exec php-cli php artisan ide-helper:models -RW
