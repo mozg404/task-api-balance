@@ -2,6 +2,8 @@
 
 namespace Controllers\BalanceController;
 
+use App\Enum\ResponseErrorCode;
+use App\Enum\ResponseStatus;
 use App\Models\Balance;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,7 +28,10 @@ class WithdrawTest extends TestCase
             'comment' => 'Списание'
         ]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => ResponseStatus::Success->value,
+            ]);
     }
 
     #[Test]
@@ -40,14 +45,18 @@ class WithdrawTest extends TestCase
             'comment' => 'Списание'
         ]);
 
-        $response->assertStatus(409);
+        $response->assertStatus(409)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::BalanceNotFound->value,
+            ]);
     }
 
     #[Test]
     public function cannotWithdrawIfInsufficientFunds(): void
     {
         $user = User::factory()->create();
-        Balance::factory()->for($user)->withAmount(200.00);
+        Balance::factory()->for($user)->withAmount(200.00)->create();
 
         $response = $this->postJson(self::URL, [
             'user_id' => $user->id,
@@ -55,7 +64,11 @@ class WithdrawTest extends TestCase
             'comment' => 'Списание'
         ]);
 
-        $response->assertStatus(409);
+        $response->assertStatus(409)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::InsufficientFunds->value,
+            ]);
     }
 
     #[Test]
@@ -67,7 +80,11 @@ class WithdrawTest extends TestCase
             'comment' => 'Пополнение'
         ]);
 
-        $response->assertStatus(404);
+        $response->assertStatus(404)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::NotFound->value,
+            ]);
     }
 
     #[Test]
@@ -80,7 +97,11 @@ class WithdrawTest extends TestCase
             'amount' => 100.001,
             'comment' => 'Пополнение'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
     }
 
     #[Test]
@@ -93,14 +114,22 @@ class WithdrawTest extends TestCase
             'amount' => -500.00,
             'comment' => 'Пополнение'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
 
         $response = $this->postJson(self::URL, [
             'user_id' => $user->id,
             'amount' => 0,
             'comment' => 'Пополнение'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
     }
 
     #[Test]
@@ -112,14 +141,22 @@ class WithdrawTest extends TestCase
             'user_id' => $user->id,
             'comment' => 'Пополнение'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
 
         $response = $this->postJson(self::URL, [
             'user_id' => $user->id,
             'amount' => '',
             'comment' => 'Пополнение'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
     }
 
     #[Test]
@@ -131,13 +168,21 @@ class WithdrawTest extends TestCase
             'user_id' => $user->id,
             'amount' => 0,
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
 
         $response = $this->postJson(self::URL, [
             'user_id' => $user->id,
             'amount' => 0,
             'comment' => ''
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
     }
 }
