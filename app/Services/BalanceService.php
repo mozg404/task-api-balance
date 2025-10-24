@@ -8,8 +8,6 @@ use App\DTO\DepositDTO;
 use App\DTO\TransferDTO;
 use App\DTO\WithdrawDTO;
 use App\Exceptions\BalanceNotFoundException;
-use App\Exceptions\InsufficientFundsException;
-use App\Exceptions\TransferringToYourselfException;
 use App\Models\Balance;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -19,20 +17,16 @@ class BalanceService
 {
     public function __construct(
         readonly private TransactionRegistrar $registrar,
+        readonly private BalanceOperator $operator,
     ) {
     }
 
     public function getBalance(BalanceRequestDto $dto): BalanceResultDto
     {
         $this->ensureExistUser($dto->user_id);
+        $balance = $this->operator->getBalance($dto->user_id);
 
-        $balance = Balance::where(['user_id' => $dto->user_id])->first();
-
-        if (!isset($balance)) {
-            throw new BalanceNotFoundException();
-        }
-
-        return new BalanceResultDto($dto->user_id, $balance->amount);
+        return new BalanceResultDto($dto->user_id, $balance);
     }
 
     public function deposit(DepositDTO $dto): void
@@ -40,9 +34,7 @@ class BalanceService
         $this->ensureExistUser($dto->user_id);
 
         DB::transaction(function () use ($dto) {
-            $balance = Balance::firstOrCreate(['user_id' => $dto->user_id], ['amount' => 0]);
-            $balance->increment('amount', $dto->amount);
-
+            $this->operator->deposit($dto->user_id, $dto->amount);
             $this->registrar->registerDepositOperation($dto->user_id, $dto->amount, $dto->amount);
         });
     }
@@ -50,17 +42,9 @@ class BalanceService
     public function withdraw(WithdrawDTO $dto): void
     {
         $this->ensureExistUser($dto->user_id);
-        $this->ensureExistBalance($dto->user_id);
 
         DB::transaction(function () use ($dto) {
-            $balance = Balance::where(['user_id' => $dto->user_id])->first();
-
-            if (!$balance->hasEnough($dto->amount)) {
-                throw new InsufficientFundsException('Insufficient funds');
-            }
-
-            $balance->decrement('amount', $dto->amount);
-
+            $this->operator->withdraw($dto->user_id, $dto->amount);
             $this->registrar->registerWithdrawOperation($dto->user_id, $dto->amount, $dto->amount);
         });
     }
@@ -70,31 +54,8 @@ class BalanceService
         $this->ensureExistUser($dto->from_user_id);
         $this->ensureExistUser($dto->to_user_id);
 
-        if ($dto->from_user_id === $dto->to_user_id) {
-            throw new TransferringToYourselfException();
-        }
-
         DB::transaction(function () use ($dto) {
-            $balanceSender = Balance::where(['user_id' => $dto->from_user_id])->first();
-
-            if (!isset($balanceSender)) {
-                throw new BalanceNotFoundException();
-            }
-
-            // Проверка баланса у отправителя
-            if (!$balanceSender->hasEnough($dto->amount)) {
-                throw new InsufficientFundsException('Insufficient funds');
-            }
-
-            // Если нет баланса у получателя - создаем
-            $balanceRecipient = Balance::firstOrCreate(['user_id' => $dto->to_user_id], ['amount' => 0]);
-
-            // Списываем у отправителя
-            $balanceSender->decrement('amount', $dto->amount);
-
-            // Добавляем получателю
-            $balanceRecipient->increment('amount', $dto->amount);
-
+            $this->operator->transfer($dto->from_user_id, $dto->to_user_id, $dto->amount);
             $this->registrar->registerTransferOperation($dto->from_user_id, $dto->to_user_id, $dto->amount, $dto->comment);
         });
     }
@@ -103,13 +64,6 @@ class BalanceService
     {
         if (!User::query()->where('id', $id)->exists()) {
             throw new ModelNotFoundException($message);
-        }
-    }
-
-    private function ensureExistBalance(int $id, string $message = 'Balance not found'): void
-    {
-        if (!Balance::query()->where('user_id', $id)->exists()) {
-            throw new BalanceNotFoundException($message);
         }
     }
 }
