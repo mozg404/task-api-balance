@@ -2,9 +2,10 @@
 
 namespace Tests\Feature\Controllers\BalanceController;
 
+use App\Enum\ResponseErrorCode;
+use App\Enum\ResponseStatus;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -25,7 +26,10 @@ class DepositTest extends TestCase
             'comment' => 'Пополнение'
         ]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => ResponseStatus::Success->value,
+            ]);
     }
 
     #[Test]
@@ -37,7 +41,11 @@ class DepositTest extends TestCase
             'comment' => 'Пополнение'
         ]);
 
-        $response->assertStatus(404);
+        $response->assertStatus(404)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::NotFound->value,
+            ]);
     }
 
     #[Test]
@@ -50,7 +58,11 @@ class DepositTest extends TestCase
             'amount' => 100.001,
             'comment' => 'Пополнение'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
     }
 
     #[Test]
@@ -63,14 +75,22 @@ class DepositTest extends TestCase
             'amount' => -500.00,
             'comment' => 'Пополнение'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
 
         $response = $this->postJson(self::URL, [
             'user_id' => $user->id,
             'amount' => 0,
             'comment' => 'Пополнение'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
     }
 
     #[Test]
@@ -82,14 +102,22 @@ class DepositTest extends TestCase
             'user_id' => $user->id,
             'comment' => 'Пополнение'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
 
         $response = $this->postJson(self::URL, [
             'user_id' => $user->id,
             'amount' => '',
             'comment' => 'Пополнение'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
     }
 
     #[Test]
@@ -101,13 +129,21 @@ class DepositTest extends TestCase
             'user_id' => $user->id,
             'amount' => 0,
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
 
         $response = $this->postJson(self::URL, [
             'user_id' => $user->id,
             'amount' => 0,
             'comment' => ''
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
     }
 }

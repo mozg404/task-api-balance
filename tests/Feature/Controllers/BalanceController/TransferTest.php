@@ -2,6 +2,8 @@
 
 namespace Controllers\BalanceController;
 
+use App\Enum\ResponseErrorCode;
+use App\Enum\ResponseStatus;
 use App\Models\Balance;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -29,7 +31,10 @@ class TransferTest extends TestCase
             'comment' => 'На мороженное'
         ]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => ResponseStatus::Success->value,
+            ]);
     }
 
     #[Test]
@@ -45,7 +50,11 @@ class TransferTest extends TestCase
             'comment' => 'На мороженное'
         ]);
 
-        $response->assertStatus(409);
+        $response->assertStatus(409)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::TransferToYourself->value,
+            ]);
     }
 
     #[Test]
@@ -61,7 +70,11 @@ class TransferTest extends TestCase
             'comment' => 'На мороженное'
         ]);
 
-        $response->assertStatus(404);
+        $response->assertStatus(404)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::NotFound->value,
+            ]);
     }
 
     #[Test]
@@ -77,7 +90,11 @@ class TransferTest extends TestCase
             'comment' => 'На мороженное'
         ]);
 
-        $response->assertStatus(404);
+        $response->assertStatus(404)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::NotFound->value,
+            ]);
     }
 
     #[Test]
@@ -94,7 +111,11 @@ class TransferTest extends TestCase
             'comment' => 'На мороженное'
         ]);
 
-        $response->assertStatus(409);
+        $response->assertStatus(409)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::BalanceNotFound->value,
+            ]);
     }
 
     #[Test]
@@ -112,7 +133,11 @@ class TransferTest extends TestCase
             'comment' => 'На мороженное'
         ]);
 
-        $response->assertStatus(409);
+        $response->assertStatus(409)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::InsufficientFunds->value,
+            ]);
     }
 
     #[Test]
@@ -129,7 +154,10 @@ class TransferTest extends TestCase
             'comment' => 'На мороженное'
         ]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => ResponseStatus::Success->value,
+            ]);
     }
 
     #[Test]
@@ -146,7 +174,11 @@ class TransferTest extends TestCase
             'amount' => 100.001,
             'comment' => 'На мороженное'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
 
         $response = $this->postJson(self::URL, [
             'from_user_id' => $userSender->id,
@@ -154,7 +186,11 @@ class TransferTest extends TestCase
             'amount' => 'amount',
             'comment' => 'На мороженное'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
 
         $response = $this->postJson(self::URL, [
             'from_user_id' => $userSender->id,
@@ -162,7 +198,11 @@ class TransferTest extends TestCase
             'amount' => 0,
             'comment' => 'На мороженное'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
 
         $response = $this->postJson(self::URL, [
             'from_user_id' => $userSender->id,
@@ -170,7 +210,11 @@ class TransferTest extends TestCase
             'amount' => -100,
             'comment' => 'На мороженное'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
     }
 
     #[Test]
@@ -187,14 +231,22 @@ class TransferTest extends TestCase
             'amount' => '',
             'comment' => 'На мороженное'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
 
         $response = $this->postJson(self::URL, [
             'from_user_id' => $userSender->id,
             'to_user_id' => $userRecipient->id,
             'comment' => 'На мороженное'
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
     }
 
     #[Test]
@@ -211,13 +263,21 @@ class TransferTest extends TestCase
             'amount' => 100,
             'comment' => ''
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
 
         $response = $this->postJson(self::URL, [
             'from_user_id' => $userSender->id,
             'to_user_id' => $userRecipient->id,
             'amount' => 100,
         ]);
-        $response->assertStatus(422);
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::ValidationError->value,
+            ]);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Controllers\BalanceController;
 
+use App\Enum\ResponseErrorCode;
+use App\Enum\ResponseStatus;
 use App\Models\Balance;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -30,6 +32,7 @@ class BalanceTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJson([
+                'status' => ResponseStatus::Success->value,
                 'user_id' => $user->id,
                 'balance' => 100.00
             ]);
@@ -39,7 +42,11 @@ class BalanceTest extends TestCase
     public function cannotGetBalanceIfUserNotExists(): void
     {
         $response = $this->getBalanceRequest(999);
-        $response->assertStatus(404);
+        $response->assertStatus(404)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::NotFound->value,
+            ]);
     }
 
     #[Test]
@@ -48,6 +55,10 @@ class BalanceTest extends TestCase
         $user = User::factory()->create();
 
         $response = $this->getBalanceRequest($user->id);
-        $response->assertStatus(409);
+        $response->assertStatus(409)
+            ->assertJson([
+                'status' => ResponseStatus::Error->value,
+                'code' => ResponseErrorCode::BalanceNotFound->value,
+            ]);;
     }
 }
