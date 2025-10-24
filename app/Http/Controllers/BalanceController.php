@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DTO\BalanceRequestDto;
 use App\DTO\DepositDto;
-use App\DTO\TransferDTO;
+use App\DTO\TransferDto;
 use App\DTO\WithdrawDTO;
 use App\Exceptions\BalanceNotFoundException;
 use App\Exceptions\InsufficientFundsException;
@@ -47,7 +47,7 @@ class BalanceController extends Controller
         return response()->noContent(200);
     }
 
-    public function transfer(TransferDTO $dto, BalanceService $service): Response
+    public function transfer(TransferDto $dto, BalanceService $service): Response
     {
         try {
             $service->transfer($dto);

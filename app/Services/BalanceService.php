@@ -5,7 +5,7 @@ namespace App\Services;
 use App\DTO\BalanceRequestDto;
 use App\DTO\BalanceResultDto;
 use App\DTO\DepositDto;
-use App\DTO\TransferDTO;
+use App\DTO\TransferDto;
 use App\DTO\WithdrawDTO;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -47,7 +47,7 @@ readonly class BalanceService
         });
     }
 
-    public function transfer(TransferDTO $dto): void
+    public function transfer(TransferDto $dto): void
     {
         $this->ensureExistUser($dto->from_user_id);
         $this->ensureExistUser($dto->to_user_id);

@@ -4,7 +4,7 @@ namespace App\DTO;
 
 use Spatie\LaravelData\Data;
 
-class TransferDTO extends Data
+class TransferDto extends Data
 {
     public function __construct(
         readonly public int $from_user_id,

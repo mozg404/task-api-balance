@@ -5,7 +5,7 @@ namespace Services;
 use App\DTO\BalanceRequestDto;
 use App\DTO\BalanceResultDto;
 use App\DTO\DepositDto;
-use App\DTO\TransferDTO;
+use App\DTO\TransferDto;
 use App\DTO\WithdrawDTO;
 use App\Models\User;
 use App\Services\BalanceOperator;
@@ -118,7 +118,7 @@ class BalanceServiceTest extends TestCase
     {
         $fromUser = User::factory()->create();
         $toUser = User::factory()->create();
-        $dto = new TransferDTO($fromUser->id, $toUser->id, 75, 'Перевод');
+        $dto = new TransferDto($fromUser->id, $toUser->id, 75, 'Перевод');
 
         $this->operator->expects($this->once())->method('transfer');
         $this->registrar->expects($this->once())->method('registerTransferOperation');
@@ -129,7 +129,7 @@ class BalanceServiceTest extends TestCase
     #[Test]
     public function cannotTransferIfUsersNotExist(): void
     {
-        $dto = new TransferDTO(999, 888, 50, 'Перевод');
+        $dto = new TransferDto(999, 888, 50, 'Перевод');
 
         $this->expectException(ModelNotFoundException::class);
 
@@ -141,7 +141,7 @@ class BalanceServiceTest extends TestCase
     {
         $fromUser = User::factory()->create();
         $toUser = User::factory()->create();
-        $dto = new TransferDTO($fromUser->id, $toUser->id, 75, 'Перевод');
+        $dto = new TransferDto($fromUser->id, $toUser->id, 75, 'Перевод');
 
         DB::shouldReceive('transaction')->once();
 
