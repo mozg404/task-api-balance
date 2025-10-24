@@ -7,17 +7,15 @@ use App\DTO\BalanceResultDto;
 use App\DTO\DepositDTO;
 use App\DTO\TransferDTO;
 use App\DTO\WithdrawDTO;
-use App\Exceptions\BalanceNotFoundException;
-use App\Models\Balance;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 
-class BalanceService
+readonly class BalanceService
 {
     public function __construct(
-        readonly private TransactionRegistrar $registrar,
-        readonly private BalanceOperator $operator,
+        private TransactionRegistrar $registrar,
+        private BalanceOperator $operator,
     ) {
     }
 
@@ -60,10 +58,10 @@ class BalanceService
         });
     }
 
-    private function ensureExistUser(int $id, string $message = 'User not found'): void
+    private function ensureExistUser(int $id): void
     {
         if (!User::query()->where('id', $id)->exists()) {
-            throw new ModelNotFoundException($message);
+            throw new ModelNotFoundException( 'User not found');
         }
     }
 }
