@@ -24,3 +24,6 @@ cli:
 
 migrate-fresh:
 	docker compose exec php-cli php artisan migrate:fresh --seed
+
+test:
+	docker compose exec php-cli php artisan test
