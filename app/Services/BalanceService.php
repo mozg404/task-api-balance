@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\DTO\BalanceRequestDto;
 use App\DTO\BalanceResultDto;
-use App\DTO\DepositDTO;
+use App\DTO\DepositDto;
 use App\DTO\TransferDTO;
 use App\DTO\WithdrawDTO;
 use App\Models\User;
@@ -27,7 +27,7 @@ readonly class BalanceService
         return new BalanceResultDto($dto->user_id, $balance);
     }
 
-    public function deposit(DepositDTO $dto): void
+    public function deposit(DepositDto $dto): void
     {
         $this->ensureExistUser($dto->user_id);
 

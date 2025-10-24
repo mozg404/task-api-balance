@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DTO\BalanceRequestDto;
-use App\DTO\DepositDTO;
+use App\DTO\DepositDto;
 use App\DTO\TransferDTO;
 use App\DTO\WithdrawDTO;
 use App\Exceptions\BalanceNotFoundException;
@@ -29,7 +29,7 @@ class BalanceController extends Controller
         }
     }
     
-    public function deposit(DepositDTO $dto, BalanceService $service): Response
+    public function deposit(DepositDto $dto, BalanceService $service): Response
     {
         $service->deposit($dto);
 
