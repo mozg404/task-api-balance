@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\DTO\DepositDTO;
+use App\DTO\TransferDTO;
 use App\DTO\WithdrawDTO;
 use App\Enum\TransactionType;
 use App\Exceptions\BalanceNotFoundException;
 use App\Exceptions\InsufficientFundsException;
+use App\Exceptions\TransferringToYourselfException;
 use App\Models\Balance;
 use App\Models\Transaction;
 use App\Models\User;
@@ -45,6 +47,52 @@ class BalanceService
         $transaction = new Transaction();
         $transaction->user_id = $dto->user_id;
         $transaction->type = TransactionType::Withdraw;
+        $transaction->amount = -$dto->amount;
+        $transaction->comment = $dto->comment;
+        $transaction->save();
+    }
+
+    public function transfer(TransferDTO $dto): void
+    {
+        $this->ensureExistUser($dto->from_user_id);
+        $this->ensureExistUser($dto->to_user_id);
+
+        if ($dto->from_user_id === $dto->to_user_id) {
+            throw new TransferringToYourselfException();
+        }
+
+        $balanceSender = Balance::where(['user_id' => $dto->from_user_id])->first();
+
+        if (!isset($balanceSender)) {
+            throw new BalanceNotFoundException();
+        }
+
+        // Проверка баланса у отправителя
+        if (!$balanceSender->hasEnough($dto->amount)) {
+            throw new InsufficientFundsException('Insufficient funds');
+        }
+
+        // Если нет баланса у получателя - создаем
+        $balanceRecipient = Balance::firstOrCreate(['user_id' => $dto->to_user_id], ['amount' => $dto->amount]);
+
+        // Списываем у отправителя
+        $balanceSender->decrement('amount', $dto->amount);
+
+        // Добавляем получателю
+        $balanceRecipient->increment('amount', $dto->amount);
+
+        $transaction = new Transaction();
+        $transaction->user_id = $dto->from_user_id;
+        $transaction->related_user_id = $dto->to_user_id;
+        $transaction->type = TransactionType::TransferOut;
+        $transaction->amount = -$dto->amount;
+        $transaction->comment = $dto->comment;
+        $transaction->save();
+
+        $transaction = new Transaction();
+        $transaction->user_id = $dto->to_user_id;
+        $transaction->related_user_id = $dto->from_user_id;
+        $transaction->type = TransactionType::TransferOut;
         $transaction->amount = -$dto->amount;
         $transaction->comment = $dto->comment;
         $transaction->save();
