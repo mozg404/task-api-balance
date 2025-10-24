@@ -8,7 +8,7 @@ class DepositDto extends Data
 {
     public function __construct(
         readonly public int $user_id,
-        readonly public int $amount,
+        readonly public float $amount,
         readonly public string $comment,
     ) {
     }
