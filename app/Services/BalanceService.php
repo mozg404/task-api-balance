@@ -7,18 +7,21 @@ use App\DTO\BalanceResultDto;
 use App\DTO\DepositDTO;
 use App\DTO\TransferDTO;
 use App\DTO\WithdrawDTO;
-use App\Enum\TransactionType;
 use App\Exceptions\BalanceNotFoundException;
 use App\Exceptions\InsufficientFundsException;
 use App\Exceptions\TransferringToYourselfException;
 use App\Models\Balance;
-use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 
 class BalanceService
 {
+    public function __construct(
+        readonly private TransactionRegistrar $registrar,
+    ) {
+    }
+
     public function getBalance(BalanceRequestDto $dto): BalanceResultDto
     {
         $this->ensureExistUser($dto->user_id);
@@ -40,12 +43,7 @@ class BalanceService
             $balance = Balance::firstOrCreate(['user_id' => $dto->user_id], ['amount' => 0]);
             $balance->increment('amount', $dto->amount);
 
-            $transaction = new Transaction();
-            $transaction->user_id = $dto->user_id;
-            $transaction->type = TransactionType::Deposit;
-            $transaction->amount = $dto->amount;
-            $transaction->comment = $dto->comment;
-            $transaction->save();
+            $this->registrar->registerDepositOperation($dto->user_id, $dto->amount, $dto->amount);
         });
     }
 
@@ -63,12 +61,7 @@ class BalanceService
 
             $balance->decrement('amount', $dto->amount);
 
-            $transaction = new Transaction();
-            $transaction->user_id = $dto->user_id;
-            $transaction->type = TransactionType::Withdraw;
-            $transaction->amount = -$dto->amount;
-            $transaction->comment = $dto->comment;
-            $transaction->save();
+            $this->registrar->registerWithdrawOperation($dto->user_id, $dto->amount, $dto->amount);
         });
     }
 
@@ -102,21 +95,7 @@ class BalanceService
             // Добавляем получателю
             $balanceRecipient->increment('amount', $dto->amount);
 
-            $transaction = new Transaction();
-            $transaction->user_id = $dto->from_user_id;
-            $transaction->related_user_id = $dto->to_user_id;
-            $transaction->type = TransactionType::TransferOut;
-            $transaction->amount = -$dto->amount;
-            $transaction->comment = $dto->comment;
-            $transaction->save();
-
-            $transaction = new Transaction();
-            $transaction->user_id = $dto->to_user_id;
-            $transaction->related_user_id = $dto->from_user_id;
-            $transaction->type = TransactionType::TransferIn;
-            $transaction->amount = $dto->amount;
-            $transaction->comment = $dto->comment;
-            $transaction->save();
+            $this->registrar->registerTransferOperation($dto->from_user_id, $dto->to_user_id, $dto->amount, $dto->comment);
         });
     }
 
