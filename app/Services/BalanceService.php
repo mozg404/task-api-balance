@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\DTO\BalanceRequestDto;
+use App\DTO\BalanceResultDto;
 use App\DTO\DepositDTO;
 use App\DTO\TransferDTO;
 use App\DTO\WithdrawDTO;
@@ -16,6 +18,19 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class BalanceService
 {
+    public function getBalance(BalanceRequestDto $dto): BalanceResultDto
+    {
+        $this->ensureExistUser($dto->user_id);
+
+        $balance = Balance::where(['user_id' => $dto->user_id])->first();
+
+        if (!isset($balance)) {
+            throw new BalanceNotFoundException();
+        }
+
+        return new BalanceResultDto($dto->user_id, $balance->amount);
+    }
+
     public function deposit(DepositDTO $dto): void
     {
         $this->ensureExistUser($dto->user_id);
