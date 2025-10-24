@@ -33,7 +33,7 @@ readonly class BalanceService
 
         DB::transaction(function () use ($dto) {
             $this->operator->deposit($dto->user_id, $dto->amount);
-            $this->registrar->registerDepositOperation($dto->user_id, $dto->amount, $dto->amount);
+            $this->registrar->registerDepositOperation($dto->user_id, $dto->amount, $dto->comment);
         });
     }
 
@@ -43,7 +43,7 @@ readonly class BalanceService
 
         DB::transaction(function () use ($dto) {
             $this->operator->withdraw($dto->user_id, $dto->amount);
-            $this->registrar->registerWithdrawOperation($dto->user_id, $dto->amount, $dto->amount);
+            $this->registrar->registerWithdrawOperation($dto->user_id, $dto->amount, $dto->comment);
         });
     }
 
