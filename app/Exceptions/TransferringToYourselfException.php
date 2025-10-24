@@ -7,5 +7,5 @@ use DomainException;
 class TransferringToYourselfException extends DomainException
 {
     protected $code = 409;
-    protected $message = 'Transferring from yourself self';
+    protected $message = 'Transferring from yourself';
 }
