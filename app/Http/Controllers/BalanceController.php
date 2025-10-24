@@ -24,7 +24,7 @@ class BalanceController extends Controller
 
             return $this->jsonSuccess([
                 'user_id' => $resultDto->user_id,
-                'balance' => $resultDto->balance,
+                'balance' => number_format($resultDto->balance, 2, '.', ''),
             ]);
         } catch (BalanceNotFoundException $e) {
             return $this->jsonError($e);

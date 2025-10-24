@@ -1,6 +1,6 @@
 <?php
 
-namespace Controllers\BalanceController;
+namespace Tests\Feature\Controllers\BalanceController;
 
 use App\Enum\ResponseErrorCode;
 use App\Enum\ResponseStatus;

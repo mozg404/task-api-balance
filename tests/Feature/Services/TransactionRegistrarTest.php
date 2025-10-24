@@ -1,6 +1,6 @@
 <?php
 
-namespace Services;
+namespace Tests\Feature\Services;
 
 use App\Enum\TransactionType;
 use App\Models\User;
