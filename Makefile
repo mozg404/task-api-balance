@@ -23,4 +23,4 @@ cli:
 	docker compose exec php-cli bash
 
 migrate-fresh:
-	docker compose run --rm php-cli php artisan migrate:fresh
+	docker compose exec php-cli php artisan migrate:fresh --seed
