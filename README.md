@@ -103,12 +103,3 @@ make clear-cache   # Очистка кэша Laravel
   "message": "Insufficient funds"
 }
 ```
-
-## Разработка
-
-```bash
-# Инициализация
-make init
-# Войти в CLI контейнер для прямого доступа к php artisan
-make cli
-```
